@@ -1,0 +1,22 @@
+{
+  "name": "reward",
+  "version": "0.0.1",
+  "description": "a sample Code for sending rewards",
+  "main": "reward.js",
+  "scripts": {
+    "dev": "node reward.js",
+    "start": "npm install && node reward.js"
+  },
+  "author": "eoshex",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eoshex/eosio_send_rewards.git"
+  },
+  "dependencies": {
+    "bignumber.js": "^8.1.1",
+    "config": "^3.0.1",
+    "eosjs": "^16.0.9",
+    "node-cron": "^2.0.3"
+  }
+}
