@@ -2,11 +2,9 @@ const cron = require("node-cron");
 const BigNumber = require("bignumber.js");
 const config = require("config");
 const { account_list } = require("./accounts");
-const eos = require("./lib/eosjs/eosClient");
-
+const { api } = require("./lib/eosjs/eosClient");
 const transfer = async () => {
   let tgMsg = `💰VOTE REWARD ${new Date()}\n========================\n`;
-  const contract = await eos.contract("eosio.token");
   let total_amount = BigNumber(0);
   for (const account of account_list) {
     const to = account.name;
@@ -14,7 +12,32 @@ const transfer = async () => {
     const eosAmountStr = eosAmount.toFixed(5).substring(0, eosAmount.toFixed(5).indexOf(".") + 5);
     if (eosAmount.isGreaterThan(0)) {
       total_amount = total_amount.plus(eosAmountStr);
-      await contract.transfer(config.eosjs.account_name, to, `${eosAmountStr} EOS`, "");
+      const result = await api.transact(
+        {
+          actions: [
+            {
+              account: "eosio.token",
+              name: "transfer",
+              authorization: [
+                {
+                  actor: config.eosjs.account_name,
+                  permission: "active"
+                }
+              ],
+              data: {
+                from: config.eosjs.account_name,
+                to: to,
+                quantity: `${eosAmountStr} EOS`,
+                memo: ""
+              }
+            }
+          ]
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30
+        }
+      );
       tgMsg += `transferred to ${to} "${eosAmountStr} EOS"\n`;
     }
   }
@@ -24,6 +47,7 @@ const transfer = async () => {
 
 const main = async () => {
   try {
+    await transfer();
     cron.schedule(
       "0 12 * * *",
       async () => {
